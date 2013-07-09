@@ -6,14 +6,14 @@ window.onload = function () {
     tryFindSketch();
 }
 
-var send = function(s)
+var send = function(playerId, x, y, z)
 {
       var socket = io.connect('http://'+ serverHostname + ':9999'); //nodejs server address
-      socket.emit("clientMsg",{txt:s});
+      socket.emit("playerPosition",{'playerId': playerId, 'posX': x, 'posY': y, 'posZ': z});
 }
 
 function tryFindSketch () {
-    var sketch = Processing.getInstanceById("lightsavergame"); //remember to change this name to whatever you processing app name is
+    var sketch = Processing.getInstanceById("lightsablegame"); 
     if ( sketch == undefined )
         return setTimeout(tryFindSketch, 200); // try again in 0.2 secs
     

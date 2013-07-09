@@ -8,8 +8,9 @@ AudioPlayer playerHit;
 AudioPlayer playerOn;
 AudioPlayer playerOff;
 Accelerometer accel;
-boolean playit = true;
+boolean playit = false;
 int maxX=0;
+int playerId = 0;
 
 void setup() {
   size(768, 1024);
@@ -27,6 +28,8 @@ void setup() {
   playerPulse.play();
   rectMode(CENTER);
   background(0);
+  //TODO identify the player id
+  //TODO allow to take the picture
 }
 
 void draw() {
@@ -47,11 +50,11 @@ void draw() {
   text(maxX, 20, 200);
 }
 void receive(String s) {
+  //TODO create a routing that allows to receive different kinds of messages
   receivedString=s;
 }
 
 void mousePressed() {
-  send("This is a test message from the web-client. Number is: " + number + ".");
   playit = !playit;
   if (playit) {
     startLaser();
@@ -67,7 +70,12 @@ void startLaser() {
   playerOn.stop();
   playerOn.cue(0);
   playerOn.play();
-  background(0, 0, 0);
+  if (playerId == 0) {
+    background(0, 0, 255);
+  } 
+  else {
+    background(255, 0, 0);
+  }
 }
 
 void stopLaser() {
@@ -75,14 +83,17 @@ void stopLaser() {
   playerOff.stop();
   playerOff.cue(0);
   playerOff.play();
-  background(255, 0, 0);
+  background(0, 0, 0);
 }
 
 void checkLaserMovement() {
-  if (accel.getX() > 10 && playit) {
-    playerHit.stop();
-    playerHit.cue(0);
-    playerHit.play();
+  if (playit) {
+    send(playerId, accel.getX(), accel.getY(), accel.getZ());
+    if (accel.getX() > 10 || accel.getY() > 10 || accel.getZ() > 10) {
+      playerHit.stop();
+      playerHit.cue(0);
+      playerHit.play();
+    }
   }
 }
 
