@@ -1,28 +1,51 @@
+
+import org.jbox2d.util.nonconvex.*;
+import org.jbox2d.dynamics.contacts.*;
+import org.jbox2d.testbed.*;
+import org.jbox2d.collision.*;
+import org.jbox2d.common.*;
+import org.jbox2d.dynamics.joints.*;
+import org.jbox2d.p5.*;
+import org.jbox2d.dynamics.*;
+
 int number=0;
 String receivedString="";
 
 
 Maxim maxim;
 AudioPlayer playerPulse;
-AudioPlayer playerHit;
+AudioPlayer[] playerHit;
 AudioPlayer playerOn;
 AudioPlayer playerOff;
 Accelerometer accel;
 boolean playit = false;
 int maxX=0;
 int playerId = 0;
+Physics physics;
+Body [] playerSable;
+CollisionDetector detector;
 
 void setup() {
   size(768, 1024);
   maxim = new Maxim(this);
   playerPulse = maxim.loadFile("sounds_light/lightsaberpulse.wav");
-  playerHit = maxim.loadFile("sounds_light/ltsaberswing01.wav");
+  
   playerOn = maxim.loadFile("sounds_light/ltsaberon01.wav");
   playerOff = maxim.loadFile("sounds_light/ltsaberoff01.wav");
-
+  
+  playerHit = new AudioPLayer[8];
+  for (int i=1;i<9;i++) {
+    String fileName = "sounds_light/ltsaberswing0" + str(i) + ".wav";
+    playerHit[i] = maxim.loadFile(fileName);
+    playerHit[i].setLooping(false);
+  }
+  
+  physics = new Physics(this, width, height, 0, 0, width * 10, height * 2, width, height, 100);
+  detector = new CollisionDetector (physics, this);
+  
   accel = new Accelerometer();
   playerPulse.setLooping(true);
-  playerHit.setLooping(false);
+  
   playerOn.setLooping(false);
   playerOff.setLooping(false);
   playerPulse.play();
@@ -30,10 +53,20 @@ void setup() {
   background(0);
   //TODO identify the player id
   //TODO allow to take the picture
+
+  //TODO get users registered.
+  
+  playerSable = new Body[7];
+  
+  setPlayerId();
+  startPoint = new Vec2(200, height-150);
+  // this converst from processing screen 
+  // coordinates to the coordinates used in the
+  // physics engine (10 pixels to a meter by default)
+  startPoint = physics.screenToWorld(startPoint);
 }
 
 void draw() {
-  //float speed = map(accel.getX(), -10, 10, 0, 2);
   checkLaserMovement();
 
   fill(100);
@@ -52,6 +85,11 @@ void draw() {
 void receive(String s) {
   //TODO create a routing that allows to receive different kinds of messages
   receivedString=s;
+}
+
+void setPlayerId() {
+  //TODO get the real user id
+  playerSable[playerId] = physics.createRect(600, height-20, 600+30, height);
 }
 
 void mousePressed() {
@@ -90,10 +128,14 @@ void checkLaserMovement() {
   if (playit) {
     send(playerId, accel.getX(), accel.getY(), accel.getZ());
     if (accel.getX() > 10 || accel.getY() > 10 || accel.getZ() > 10) {
-      playerHit.stop();
-      playerHit.cue(0);
-      playerHit.play();
+      int hitSound = ((int)random(8)) + 1; 
+      playerHit[hitSound].stop();
+      playerHit[hitSound].cue(0);
+      playerHit[hitSound].play();
     }
   }
 }
+//
+//void collision(Body b1, Body b2, float impulse) {
+//}
 
