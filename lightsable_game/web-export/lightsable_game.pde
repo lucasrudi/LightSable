@@ -58,7 +58,6 @@ void setup() {
   
   playerSable = new Body[7];
   
-  setPlayerId();
   startPoint = new Vec2(200, height-150);
   // this converst from processing screen 
   // coordinates to the coordinates used in the
@@ -67,6 +66,9 @@ void setup() {
 }
 
 void draw() {
+  if (playerId == 0 ) {
+     getplayerid(playerId);
+   }
   checkLaserMovement();
 
   fill(100);
@@ -85,10 +87,14 @@ void draw() {
 void receive(String s) {
   //TODO create a routing that allows to receive different kinds of messages
   receivedString=s;
+  
+  println(s);
 }
 
-void setPlayerId() {
+void setPlayerId(String id) {
   //TODO get the real user id
+  //playerId = getplayerid();
+  println(id);
   playerSable[playerId] = physics.createRect(600, height-20, 600+30, height);
 }
 
@@ -135,8 +141,8 @@ void checkLaserMovement() {
     }
   }
 }
-//
-//void collision(Body b1, Body b2, float impulse) {
-//}
+
+void collision(Body b1, Body b2, float impulse) {
+}
 
 

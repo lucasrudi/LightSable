@@ -46,8 +46,8 @@ void setup() {
 void draw() {
   background(0);
   fill(255);
-  text(number++, 10, 100);
-  text(receivedString, 30, 120);
+  
+  text(receivedString, 10, 100);
 }
 
 void receive(String s) {

@@ -1,6 +1,7 @@
 var express = require('express');
 var app = express();
 var socket = require('socket.io');
+var clients = [];
 
 app.configure(function(){
   app.use(express.static(__dirname + '/'));
@@ -23,6 +24,16 @@ io.sockets.on('connection', function (socket) {
   console.log("connnect");
   //msg sent whenever someone connects
   socket.emit("serverMsg",{txt:"Connected to server"});
+  var amoutOfClients = 0;
+  if (clients.length) {
+    amoutOfClients = clients.length;
+  }
+  clients[amoutOfClients] = 'd';
+  console.log("clients" + clients);
+  clientId = amoutOfClients + 1;
+
+  socket.emit("receivePlayerId", {c:clientId});
+    
 
   //some web-client disconnects
   socket.on('disconnect', function (socket) {
@@ -39,6 +50,11 @@ io.sockets.on('connection', function (socket) {
     console.log("message ---- " , msg);
     msg.append(jsonString)
     oscClient.send(msg)
+  });
+  socket.on('playerId', function (socket) {
+    console.log("playerId------" , socket);
+    //pass the msg on to the oscClient
+    
   });
 
   //received an osc msg
