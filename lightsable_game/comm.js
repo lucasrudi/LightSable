@@ -9,7 +9,21 @@ window.onload = function () {
 var send = function(playerId, x, y, z)
 {
       var socket = io.connect('http://'+ serverHostname + ':9999'); //nodejs server address
-      socket.emit("playerPosition",{'playerId': playerId, 'posX': x, 'posY': y, 'posZ': z});
+      socket.emit("playerPosition", {'playerId': playerId, 'pos': {'X': x, 'Y': y, 'Z': z}});
+      var sketch = Processing.getInstanceById("lightsablegame"); 
+      socket.on("message",function(data){
+        var id, x, y, z;
+        for (player in data) {
+          if (data[player]) {
+            id = data[player].playerId;
+            x = data[player].pos.X;
+            y = data[player].pos.Y;
+            z = data[player].pos.Z;
+            sketch.registerPlayerPosition(id, x, y, z);
+          }
+
+        }
+      });
 }
 
 var getplayerid = function(playerId)
@@ -25,6 +39,9 @@ function tryFindSketch () {
     var socket = io.connect('http://'+ serverHostname + ':9999'); //nodejs server address
     socket.on("serverMsg",function(data){
       sketch.receive(data.txt);
+    });
+    socket.on("playerPosition",function(data){
+      sketch.receive(data);
     });
     socket.on("receivePlayerId",function(data){
       console.log(data);

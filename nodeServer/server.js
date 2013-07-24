@@ -2,6 +2,7 @@ var express = require('express');
 var app = express();
 var socket = require('socket.io');
 var clients = [];
+var pos = [];
 
 app.configure(function(){
   app.use(express.static(__dirname + '/'));
@@ -24,13 +25,30 @@ io.sockets.on('connection', function (socket) {
   console.log("connnect");
   //msg sent whenever someone connects
   socket.emit("serverMsg",{txt:"Connected to server"});
-  var amoutOfClients = 0;
-  if (clients.length) {
-    amoutOfClients = clients.length;
+
+  //socket.handshake.address
+  var clientId = 0;
+  for (clientsInfo in clients) {
+    console.log(socket.handshake.address);
+    console.log(clients[clientsInfo].ip);
+    if (clients[clientsInfo].ip === socket.handshake.address.address) {
+      console.log("already registered");
+      clientId = clients.playerId;
+    }
   }
-  clients[amoutOfClients] = 'd';
-  console.log("clients" + clients);
-  clientId = amoutOfClients + 1;
+  if (clientId === 0) {
+    var amoutOfClients = 0;
+    if (clients.length) {
+      amoutOfClients = clients.length;
+    }
+    
+    clientId = amoutOfClients + 1;
+    clients[amoutOfClients + 1] = {playerId:clientId, ip:socket.handshake.address.address};
+    console.log("users registered", clients.length);
+  }
+  console.log("clients" + clients.length);
+  
+
 
   socket.emit("receivePlayerId", {c:clientId});
     
@@ -43,19 +61,23 @@ io.sockets.on('connection', function (socket) {
   //some web-client sents in a msg
   socket.on('playerPosition', function (data) {
 
-    console.log("data------" , data);
+    //console.log("receivedPlayerPosition:", data);
+    pos[data.playerId] = data;
     //pass the msg on to the oscClient
-    var jsonString = JSON.stringify(data);
-    var msg =  new osc.Message('/playerPosition')
-    console.log("message ---- " , msg);
-    msg.append(jsonString)
-    oscClient.send(msg)
+    //var jsonString = JSON.stringify(pos);
+    //var msg =  new osc.Message('/receivePlayersPositions');
+    socket.broadcast.json.send(pos);
+    //oscClient.send(jsonString);
+    //console.log("data------" , pos);
   });
-  socket.on('playerId', function (socket) {
-    console.log("playerId------" , socket);
-    //pass the msg on to the oscClient
+
+  // socket.on('playerId', function (data) {
+  //   console.log("playerIddata------" , data);
+  //   socket.emit("/playerPosition", {p: pos});
+  //   //console.log("playerId------" , socket);
+  //   //pass the msg on to the oscClient
     
-  });
+  // });
 
   //received an osc msg
   oscServer.on("message", function (msg, rinfo) {
